@@ -173,11 +173,10 @@ extension ServerEvent {
             )
 
         case "task_progress":
-            return .toolProgress(
+            return .taskProgress(
                 sessionId: sid,
                 toolUseId: payload["toolUseId"]?.stringValue ?? "",
-                elapsedSeconds: payload["elapsedSeconds"]?.doubleValue ?? 0,
-                turnId: payload["turnId"]?.stringValue
+                elapsedSeconds: payload["elapsedSeconds"]?.doubleValue ?? 0
             )
 
         case "permission_request":

@@ -302,9 +302,10 @@ public actor RPCClient {
     private func decodeResult<T: Decodable>(_ raw: AnyCodable?, as type: T.Type) throws -> T {
         // Handle Void-like result (when T is AnyCodable? or optional)
         if T.self == AnyCodable.self || T.self == AnyCodable?.self {
-            // Force cast is safe here because we checked the type
-            // swiftlint:disable:next force_cast
-            return (raw ?? AnyCodable.null) as! T
+            guard let result = (raw ?? AnyCodable.null) as? T else {
+                throw RPCError.decodingFailed("Cannot cast AnyCodable to \(T.self)")
+            }
+            return result
         }
 
         guard let raw else {

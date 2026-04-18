@@ -235,26 +235,20 @@ public actor WebSocketTransport {
     /// Waits for a `handshake_ack` envelope, timing out after 5 seconds.
     private func waitForHandshakeAck() async throws -> MessageEnvelope {
         try await withCheckedThrowingContinuation { continuation in
-            // We'll use a task to listen on the subject with timeout
-            let task = Task { [weak incomingEnvelopes] in
-                // Use a timeout approach: poll for 5 seconds
+            let timeoutTask = Task {
                 let deadline = Date().addingTimeInterval(5)
                 while Date() < deadline {
                     try Task.checkCancellation()
-                    // Small sleep to avoid busy-wait
                     try await Task.sleep(nanoseconds: 50_000_000) // 50ms
                 }
-                // If we get here, we timed out
                 continuation.resume(throwing: TransportError.handshakeTimeout)
-                _ = incomingEnvelopes // Silence unused warning
             }
 
-            // Also listen for incoming envelopes to find the ack
             var cancellable: AnyCancellable?
             cancellable = incomingEnvelopes
                 .first(where: { $0.type == .handshakeAck || $0.type == .error })
                 .sink { envelope in
-                    task.cancel()
+                    timeoutTask.cancel()
                     cancellable?.cancel()
                     cancellable = nil
 
@@ -364,7 +358,6 @@ public actor WebSocketTransport {
     // MARK: - Reconnection
 
     private func handleDisconnection(error: Error?) async {
-        let wasConnected = isHandshakeComplete
         isHandshakeComplete = false
 
         guard shouldReconnect else {
@@ -379,14 +372,7 @@ public actor WebSocketTransport {
             return
         }
 
-        // Only attempt reconnect if we previously had a successful connection
-        // or this is an initial connection failure
-        if wasConnected || reconnectAttempt > 0 {
-            await scheduleReconnect()
-        } else {
-            // First connection attempt failed, still try reconnect
-            await scheduleReconnect()
-        }
+        await scheduleReconnect()
     }
 
     private func scheduleReconnect() async {
