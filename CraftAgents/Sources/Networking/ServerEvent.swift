@@ -15,30 +15,9 @@ public struct SessionMeta: Codable, Sendable, Identifiable {
     public var permissionMode: String?
 }
 
-/// Token usage snapshot.
-public struct TokenUsage: Codable, Sendable {
-    public var inputTokens: Int?
-    public var outputTokens: Int?
-    public var totalTokens: Int?
-    public var contextTokens: Int?
-    public var costUsd: Double?
-    public var cacheReadTokens: Int?
-    public var cacheCreationTokens: Int?
-    public var contextWindow: Int?
-}
-
-/// Minimal message DTO used in events.
-public struct Message: Codable, Sendable, Identifiable {
-    public let id: String
-    public var role: String
-    public var content: String
-    public var timestamp: Double?
-    public var toolName: String?
-    public var toolUseId: String?
-    public var toolInput: [String: AnyCodable]?
-    public var toolResult: String?
-    public var toolStatus: String?
-}
+// Note: `Message` and `TokenUsage` are defined in Models/ and shared
+// across the app. They are decoded from event payloads via
+// `decodeFromAnyCodable`.
 
 /// Permission request payload from the server.
 public struct PermissionRequestData: Codable, Sendable {
