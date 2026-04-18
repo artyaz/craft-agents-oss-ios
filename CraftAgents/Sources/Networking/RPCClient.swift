@@ -175,7 +175,6 @@ public actor RPCClient {
         }
 
         let envelope = MessageEnvelope(
-            id: UUID().uuidString.lowercased(),
             type: .request,
             channel: channel,
             args: args
@@ -276,7 +275,7 @@ public actor RPCClient {
         timeoutTask?.cancel()
         timeoutTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
+                try? await Task.sleep(nanoseconds: UInt64(ProtocolConstants.timeoutSweepIntervalSeconds * 1_000_000_000))
                 guard !Task.isCancelled else { return }
                 await self?.sweepTimedOut()
             }

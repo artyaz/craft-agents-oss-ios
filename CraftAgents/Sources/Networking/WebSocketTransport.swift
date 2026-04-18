@@ -174,7 +174,7 @@ public actor WebSocketTransport {
         urlSession = session
 
         var request = URLRequest(url: url)
-        request.timeoutInterval = 10
+        request.timeoutInterval = ProtocolConstants.handshakeTimeoutSeconds
 
         let ws = session.webSocketTask(with: request)
         webSocketTask = ws
@@ -236,10 +236,10 @@ public actor WebSocketTransport {
     private func waitForHandshakeAck() async throws -> MessageEnvelope {
         try await withCheckedThrowingContinuation { continuation in
             let timeoutTask = Task {
-                let deadline = Date().addingTimeInterval(5)
+                let deadline = Date().addingTimeInterval(ProtocolConstants.handshakeTimeoutSeconds)
                 while Date() < deadline {
                     try Task.checkCancellation()
-                    try await Task.sleep(nanoseconds: 50_000_000) // 50ms
+                    try await Task.sleep(nanoseconds: ProtocolConstants.handshakePollIntervalNanoseconds)
                 }
                 continuation.resume(throwing: TransportError.handshakeTimeout)
             }

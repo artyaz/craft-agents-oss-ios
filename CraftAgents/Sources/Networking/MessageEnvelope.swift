@@ -109,4 +109,7 @@ public enum ProtocolConstants {
     public static let requestTimeoutSeconds: TimeInterval = 30
     public static let sequenceAckIntervalSeconds: TimeInterval = 5
     public static let disconnectedClientTTLSeconds: TimeInterval = 60
+    public static let handshakeTimeoutSeconds: TimeInterval = 5
+    public static let timeoutSweepIntervalSeconds: TimeInterval = 1
+    static let handshakePollIntervalNanoseconds: UInt64 = 50_000_000 // 50ms
 }
